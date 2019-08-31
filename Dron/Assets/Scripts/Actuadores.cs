@@ -4,17 +4,28 @@ using UnityEngine;
 
 public class Actuadores : MonoBehaviour
 {
-    private Rigidbody rb;
-    private float upForce; // fuerzaElevacion
-    private float movementForwardSpeed = 250.0f;
-    private float wantedYRotation;
-    private float currentYRotation;
-    private float rotateAmountByKeys = 2.5f;
-    private float rotationYVelocity;
-    private float sideMovementAmount = 250.0f;
+    private Rigidbody rb; // Componente para simular acciones físicas realistas
+    private Bateria bateria; // Componente adicional (script) que representa la batería
+    private Sensores sensor; // Componente adicional (script) para obtener información de los sensores
+
+    private float upForce; // Indica la fuerza de elevación del dron
+    private float movementForwardSpeed = 250.0f; // Escalar para indicar fuerza de movimiento frontal
+    private float wantedYRotation; // Auxiliar para el cálculo de rotación
+    private float currentYRotation; // Auxiliar para el cálculo de rotación
+    private float rotateAmountByKeys = 2.5f; // Auxiliar para el cálculo de rotación
+    private float rotationYVelocity; // Escalar (calculado) para indicar velocidad de rotación
+    private float sideMovementAmount = 250.0f; // Escalar para indicar velocidad de movimiento lateral
+
+    // Asignaciones de componentes
     void Start(){
         rb = GetComponent<Rigidbody>();
+        sensor = GetComponent<Sensores>();
+        bateria = GameObject.Find("Bateria").gameObject.GetComponent<Bateria>();
     }
+
+    // ========================================
+    // A partir de aqui, todos los métodos definidos son públicos, la intención
+    // es que serán usados por otro componente (Controlador)
 
     public void Ascender(){
         upForce = 190;
@@ -36,7 +47,7 @@ public class Actuadores : MonoBehaviour
     }
 
     public void Atras(){
-        rb.AddRelativeForce(Vector3.forward * -movementForwardSpeed);
+        rb.AddRelativeForce(Vector3.back * movementForwardSpeed);
     }
 
     public void GirarDerecha(){
@@ -56,32 +67,21 @@ public class Actuadores : MonoBehaviour
     }
 
     public void Izquierda(){
-        rb.AddRelativeForce(Vector3.right * -sideMovementAmount);
+        rb.AddRelativeForce(Vector3.left * sideMovementAmount);
     }
 
-    public void VHSpeed1(){
-        rb.velocity = Vector3.ClampMagnitude(rb.velocity, Mathf.Lerp(rb.velocity.magnitude, 1.0f, Time.deltaTime *10f));
-    }
-    public void VHSpeed2(){
-        rb.velocity = Vector3.ClampMagnitude(rb.velocity, Mathf.Lerp(rb.velocity.magnitude, 1.0f, Time.deltaTime *10f));
+    public void Detener(){
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 
-    private Vector3 velocitysmooth;
-    public void VHSpeed3(){
-        rb.velocity = Vector3.SmoothDamp(rb.velocity, Vector3.zero, ref velocitysmooth, 0.15f);
-    }
-    private float currentSideWay;
-    private float tillVelocity;
-    
-    //Sideways
-    public void swerwe1(){
-        rb.AddRelativeForce(Vector3.right * Input.GetAxis("Horizontal") * sideMovementAmount);
-        currentSideWay = Mathf.SmoothDamp(currentSideWay, 20 * Input.GetAxis("Horizontal"), ref tillVelocity, 0.1f);
+    public void Limpiar(GameObject basura){
+        basura.SetActive(false);
+        sensor.SetTocandoBasura(false);
+        sensor.SetCercaDeBasura(false);
     }
 
-    public void swerwe0(){
-        currentSideWay = Mathf.SmoothDamp(currentSideWay, 0,ref tillVelocity, 0.1f);
+    public void CargarBateria(){
+        bateria.Cargar();
     }
-
 }
-

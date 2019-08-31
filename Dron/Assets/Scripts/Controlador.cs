@@ -4,15 +4,27 @@ using UnityEngine;
 
 public class Controlador : MonoBehaviour
 {
+    // Idealmente sólo se requiere de sensores y actuadores para programar el comportamiento
     private Actuadores actuador;
     private Sensores sensor;
 
+    // Asignaciones de componentes
     void Start(){
         actuador = GetComponent<Actuadores>();
         sensor = GetComponent<Sensores>();
     }
 
+    // Update y FixedUpdate son similares en uso, pero por regla general se recomienda usar
+    // FixedUpdate para calcular elementos físicos como el uso de Rigidbody
     void FixedUpdate(){
+
+        // El agente no realiza ninguna acción si no tiene batería
+        if(sensor.Bateria() <= 0)
+            return;
+
+        // A continuación se muestran ejemplos de uso de actuadores y sensores
+        // para ser utilizados de manera manual (por una persona):
+
         if(Input.GetKey(KeyCode.I))
             actuador.Ascender();
         if(Input.GetKey(KeyCode.K))
@@ -36,34 +48,25 @@ public class Controlador : MonoBehaviour
             actuador.Izquierda();
 
 
-        if(sensor.TocandoBasura())
+        if(sensor.TocandoBasura()){
             Debug.Log("Tocando basura!");
+            actuador.Limpiar(sensor.GetBasura());
+        }
         if(sensor.TocandoPared())
             Debug.Log("Tocando pared!");
 
-            // Manejo de velocidades
-        if(Mathf.Abs(Input.GetAxis("Vertical")) > 0.2f && (Input.GetAxis("Horizontal")) > 0.2f){
-        	actuador.VHSpeed1();
-        	Debug.Log("uno");
+        if(sensor.CercaDeBasura())
+            Debug.Log("Cerca de una basura!");
+        if(sensor.CercaDePared())
+            Debug.Log("Cerca de una pared!");
 
-        }
-        if(Mathf.Abs(Input.GetAxis("Vertical")) > 0.2f && (Input.GetAxis("Horizontal")) < 0.2f){
-        	actuador.VHSpeed1();
-        	Debug.Log("dos");
-        }
-        if(Mathf.Abs(Input.GetAxis("Vertical")) < 0.2f && (Input.GetAxis("Horizontal")) > 0.2f){
-        	actuador.VHSpeed2();
-        	Debug.Log("tres");
-        }
-        if(Mathf.Abs(Input.GetAxis("Vertical")) < 0.2f && (Input.GetAxis("Horizontal")) < 0.2f){
-        	actuador.VHSpeed3();
-        	Debug.Log("Mantener");
-        }
-        //Sideways
-        if(Mathf.Abs(Input.GetAxis("Horizontal")) < 0.2f){
-        	actuador.swerwe1();
-        }else{
-        	actuador.swerwe0();
-        }
+        if(sensor.FrenteAPared())
+            Debug.Log("Frente a pared!");
+
+
+        if(Input.GetKey(KeyCode.F))
+            actuador.Detener();
+        if(Input.GetKey(KeyCode.G))
+            Debug.Log(sensor.Ubicacion());
     }
 }
